@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>单词</title>
+<!-- 		<style>
+			body{
+				display:flex;
+				flex-direction:column;
+				align-items:center;
+				justify-content:center;
+			}
+			div{
+				display:flex;
+				flex-direction:column;
+				align-items:center;
+				justify-content:center;
+			}
+			ul{
+				padding: 20px;
+				border: 2px solid red;
+
+			}
+		</style> -->
+	</head>
+	<body>
+		<div id="box">
+			<div id="row">
+				<p>中文</p><input id="input1" />
+				<p>英文</p><input id="input2" />
+				<button id="button1">添加词汇</button>
+			</div>
+			<h2>词汇表</h2>
+			<ul id="ul1">
+			</ul>
+			<div id="choubei">
+				<h4>抽背功能块</h4>
+				<input id="input3" type="number" min="1" step="1"/><button id="button2">开始抽背</button><button id="button3">重置</button><button id="button4">切换中英文</button><p id='p1'>当前：仅提示中文</p>
+				<ul id="ul2"></ul>
+			</div>
+			<h4>版本日志</h4>
+			<p>v0.1_09-23_能存东西、加东西了</p>
+			<p>v0.2_09-23_能删东西了</p>
+			<p>v0.3_09-24_能抽背了</p>
+		</div>
+		<script>
+			let button1 = document.getElementById('button1');
+			let button2 = document.getElementById('button2');
+			let button3 = document.getElementById('button3');
+			let button4 = document.getElementById('button4');
+			let input1 = document.getElementById('input1');
+			let input2 = document.getElementById('input2');
+			let input3 = document.getElementById('input3');
+			let ul1 = document.getElementById('ul1');
+			let ul2 = document.getElementById('ul2');
+			let p1 = document.getElementById('p1');
+			let words = [{
+				front: '文本',
+				back: 'text'
+			}]
+			let choubei=[]
+			let yincang=false
+			let mode='front'
+			if (localStorage.getItem('words_test') == null) {
+				words = [
+					{
+						front: '超出可滚动',
+						back: 'overflow:auto'
+					},
+				]
+			} else {
+				words = JSON.parse(localStorage.getItem('words_test'))
+			}
+
+			function update1(list, ul) {
+				ul.innerHTML = ""
+				list.forEach((item, i) => {
+					ul.innerHTML += `<li>${item.front}:${item.back}<button data-index='${i}'>删</button></li>`;
+				})
+			}
+			function update2(list, ul,mode) {
+				ul.innerHTML = ""
+				if(mode=='front'){
+					list.forEach((item, i) => {
+						ul.innerHTML += `<li>${item.front}<button data-index='${i}'>会背</button></li>`;
+					})
+				}
+				else if(mode=='back'){
+					list.forEach((item, i) => {
+						ul.innerHTML += `<li>${item.back}<button data-index='${i}'>会背</button></li>`;
+					})
+				}
+				else if(mode=='no'){
+					list.forEach((item, i) => {
+						ul.innerHTML += `<li>${item.front}</li>`;
+					})
+				}
+			}
+			ul1.addEventListener('click', function(e) {
+				words = words.filter(function(item, i) {
+					if (Number(e.target.dataset.index) == i) {
+						return (false)
+					} else {
+						return (true)
+					}
+				})
+				localStorage.setItem('words_test', JSON.stringify(words))
+				update1(words, ul1)
+			})
+			ul2.addEventListener('click', function(e) {
+				choubei = choubei.filter(function(item, i) {
+					if (Number(e.target.dataset.index) == i) {
+						return (false)
+					} else {
+						return (true)
+					}
+				})
+				localStorage.setItem('words_test', JSON.stringify(words))
+				update2(choubei, ul2,mode)
+			})
+			update1(words, ul1)
+			document.addEventListener('keydown', function(e) {
+				if (e.key = 'Enter') {
+					if (input1.value != '') {
+						if (input2.value != '') {
+							words.push({
+								front: input1.value,
+								back: input2.value
+							});
+							localStorage.setItem('words_test', JSON.stringify(words));
+							update1(words, ul1);
+						}
+					}
+				}
+			})
+			button1.addEventListener('click', function() {
+				if (input1.value != '') {
+					if (input2.value != '') {
+						words.push({
+							front: input1.value,
+							back: input2.value
+						});
+						localStorage.setItem('words_test', JSON.stringify(words));
+						update1(words, ul1);
+					}
+				}
+			})
+			button2.addEventListener('click',function(){
+				if (yincang===false){
+					yincang=true;
+					if(input3.value!=0){
+						let pool=words.slice();
+						console.log(pool);
+						choubei=[];
+						ul1.style.display='none';
+						ul2.style.display='';
+						for(let i =0;i<input3.value;i++){
+							let o =Math.floor(Math.random()*pool.length);
+							choubei.push(pool[o]);
+							pool.splice(o,1);
+							console.log(pool);
+						};
+						update2(choubei,ul2,mode);
+					}
+					else{
+						choubei.push({front:'输入不合法！请输入小于或等于单词表词汇量的非零整数！'});
+						update2(choubei,ul2,'no');
+						ul2.style.display='';
+					}
+				}
+			})
+			button3.addEventListener('click',function(){
+				yincang=false;
+				ul1.style.display='';
+				ul2.style.display='none';
+				choubei=[];
+			})
+			button4.addEventListener('click',function(){
+				if(mode=='front'){
+					mode='back';
+					p1.textContent='当前：仅提示英文';
+				}
+				else{
+					mode='front';
+					p1.textContent='当前：仅提示中文';
+				}
+			})
+		</script>
+	</body>
+</html>
